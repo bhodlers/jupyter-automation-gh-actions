@@ -3,41 +3,34 @@ name: Jupyter
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 */8 * * *'
+    - cron: "0 */8 * * *"
+
+permissions:
+  contents: write
 
 jobs:
   build:
-    
     runs-on: ubuntu-latest
 
     steps:
-      
-      - id: checkout
-        name: Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install scraper
         run: pip install -r requirements.txt
 
-      - id: execute
-        name: Execute Jupyter notebook
-        run: jupyter execute download.ipynb
-        shell: bash
+      - name: Execute Jupyter notebook
+        run: jupyter nbconvert --to notebook --execute download.ipynb --output download.ipynb
 
-      - id: commit
-        name: Commit
+      - name: Commit and push
         run: |
-          git config --local user.name actions-user
+          git config --local user.name "github-actions"
           git config --local user.email "actions@github.com"
-          git add *
-          git commit -am "GH Action Headlines $(date)"
-          git push origin main
-        env: 
-          REPO_KEY: ${{secrets.GITHUB_TOKEN}}
-          username: github-actions
-        shell: bash
+          git add -A
+          git commit -m "GH Action Headlines $(date)" || exit 0
+          git push
