@@ -1,4 +1,5 @@
-name: CI
+name: Jupyter
+
 on:
   workflow_dispatch:
   schedule:
@@ -6,9 +7,11 @@ on:
 
 jobs:
   build:
-    name: fine-tuning
+    
     runs-on: ubuntu-latest
+
     steps:
+      
       - id: checkout
         name: Checkout repository
         uses: actions/checkout@v4
@@ -19,14 +22,12 @@ jobs:
           python-version: '3.12'
 
       - name: Install scraper
-        run: pip install jupyterlab requests python-twitter pillow fastprogress tqdm 'mastodon.py' requests matplotlib
+        run: pip install -r requirements.txt
 
       - id: execute
         name: Execute Jupyter notebook
-        run: jupyter execute tweet.ipynb
+        run: jupyter execute download.ipynb
         shell: bash
-
-      - run: date > datestamp.txt
 
       - id: commit
         name: Commit
@@ -36,5 +37,5 @@ jobs:
           git config pull.rebase false
           git pull origin $GITHUB_REF
           git add datestamp.txt
-          git commit -m "Ran a scrape" --author="palewire <palewire@users.noreply.github.com>" && git push || true
+          git commit -m "Ran a scrape" --author="bhodler <bhodler@users.noreply.github.com>" && git push || true
         shell: bash
